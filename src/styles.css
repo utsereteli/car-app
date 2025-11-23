@@ -449,8 +449,8 @@ body:has(#modal:not(.hidden)) {
         border-radius: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 100vh !important;
-        min-height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
         overflow-y: auto;
         padding: 1rem;
         display: flex;
