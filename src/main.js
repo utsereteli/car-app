@@ -861,6 +861,26 @@ function handleSort(sortKey) {
 // ============================================================================
 
 /**
+ * Escapes a CSV field value
+ * @param {string} value - The value to escape
+ * @returns {string} Escaped CSV value
+ */
+function escapeCSVField(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    
+    const stringValue = String(value);
+    
+    // If value contains comma, quote, or newline, wrap in quotes and escape internal quotes
+    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes('\r')) {
+        return '"' + stringValue.replace(/"/g, '""') + '"';
+    }
+    
+    return stringValue;
+}
+
+/**
  * Exports filtered cars to CSV
  */
 function exportToCSV() {
@@ -870,13 +890,23 @@ function exportToCSV() {
         return;
     }
 
-    const headers = FIELDS_CONFIG.map(field => field.label).join(',');
+    // Create headers with proper escaping
+    const headers = FIELDS_CONFIG.map(field => escapeCSVField(field.label)).join(',');
+    
+    // Create rows with proper escaping
     const rows = filteredCars.map(car => {
-        return FIELDS_CONFIG.map(field => car[field.key]).join(',');
+        return FIELDS_CONFIG.map(field => escapeCSVField(car[field.key])).join(',');
     });
 
+    // Combine headers and rows
     const csv = [headers, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    
+    // Add UTF-8 BOM for proper encoding recognition (especially for Excel)
+    const BOM = '\uFEFF';
+    const csvWithBOM = BOM + csv;
+    
+    // Create blob with UTF-8 encoding
+    const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = CSV_FILENAME;
