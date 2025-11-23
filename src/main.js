@@ -62,6 +62,15 @@ const FIELDS_CONFIG = [
         shortLabel: 'ძრ. მოცულობა'
     },
     {
+        key: 'turbo',
+        label: 'ტურბინა',
+        filterId: 'filterTurbo',
+        modalId: 'turbo',
+        datalistId: 'turboListModal',
+        sortKey: 'turbo',
+        shortLabel: 'ტურბინა'
+    },
+    {
         key: 'filterD',
         label: 'ძრავის ფილტრი',
         filterId: 'filterFilterD',
@@ -156,13 +165,17 @@ const loadDarkMode = () => {
         document.documentElement.classList.remove('dark');
         document.body.classList.remove('dark');
     } else {
-        // Check system preference
+        // Default: check system preference
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
             document.body.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.body.classList.remove('dark');
         }
     }
     updateDarkModeIcons();
+    updateStatusBarStyle();
 };
 
 /**
@@ -182,6 +195,8 @@ const toggleDarkMode = () => {
     
     // Update icons immediately
     updateDarkModeIcons();
+    // Update status bar style
+    updateStatusBarStyle();
     
     // Re-render all icons after dark mode toggle
     setTimeout(() => {
@@ -189,6 +204,25 @@ const toggleDarkMode = () => {
         // Ensure icons are updated after re-render
         updateDarkModeIcons();
     }, 100);
+};
+
+/**
+ * Updates status bar style for iOS based on dark mode
+ */
+const updateStatusBarStyle = () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    let statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    
+    if (!statusBarMeta) {
+        // Create meta tag if it doesn't exist
+        statusBarMeta = document.createElement('meta');
+        statusBarMeta.setAttribute('name', 'apple-mobile-web-app-status-bar-style');
+        document.head.appendChild(statusBarMeta);
+    }
+    
+    // Dark mode: black status bar (white text on dark background)
+    // Light mode: default status bar (black text on white background)
+    statusBarMeta.setAttribute('content', isDark ? 'black' : 'default');
 };
 
 /**
@@ -246,6 +280,7 @@ if (window.matchMedia) {
                 document.body.classList.remove('dark');
             }
             updateDarkModeIcons();
+            updateStatusBarStyle();
             feather.replace();
         }
     });
@@ -1097,6 +1132,7 @@ renderModalFields();
 renderColumnVisibilityMenu();
 setupEventListeners();
 updateDarkModeIcons(); // Update dark mode icons after initialization
+updateStatusBarStyle(); // Update status bar style after initialization
 loadCars();
 
 // ============================================================================
